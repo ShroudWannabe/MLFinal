@@ -179,12 +179,38 @@ def one_hot_encode_columns(df, columns):
     return df
 '''
 
+def sample_and_preprocess(df, sample_fraction=0.1):
+    """
+    Randomly sample a fraction of the dataset and preprocess it.
+    
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The original dataset.
+    sample_fraction : float
+        The fraction of the dataset to randomly sample (default is 10%).
+    
+    Returns
+    -------
+    sampled_df : pandas.DataFrame
+        The sampled and preprocessed dataset.
+    """
+    # Randomly sample the specified fraction of the dataset
+    sampled_df = df.sample(frac=sample_fraction, random_state=42)
+    
+    # Call your existing preprocessing function
+    sampled_df = pre(sampled_df)
+    
+    return sampled_df
+
 
 
 
 def main():
     """
+    *****************
     Main file to run from the command line.
+    *****************
     """
     # set up the program to take in arguments from the command line
     parser = argparse.ArgumentParser()
@@ -192,11 +218,43 @@ def main():
                         help="filename of training data")
     args = parser.parse_args()
     df = pd.read_csv(args.input)
-    df = pre(df)
-    train_df, test_df = train_test_split(df)
-    # solution here
 
+
+    '''
+    *****************
+    Preprocessing Step here 
+    *****************
+    '''
+    df = pre(df)
+
+
+    '''
+    *****************
+    Training with sample dataset
+    *****************
+    '''
+
+    # Sample and preprocess a fraction of the dataset
+    sampled_df = sample_and_preprocess(df, sample_fraction=0.1)
+
+    # Split the sampled dataset into training and testing sets
+    train_df, test_df = train_test_split(sampled_df, test_size=0.2, random_state=42)
+
+    # Continue with training or further processing...
+    print("Sampled Training DF Shape:", train_df.shape)
+    print("Sampled Test DF Shape:", test_df.shape)
     
+    # Example: Save the sampled datasets to file (optional)
+    train_df.to_csv("sampled_train.csv", index=False)
+    test_df.to_csv("sampled_test.csv", index=False)
+
+
+"""
+    '''
+    Training with the full dataset
+    '''
+    train_df, test_df = train_test_split(df)
+        
     nonext = os.path.splitext(args.input)[0]
     print("Training DF Shape:", train_df.shape)
     train_df.to_csv(nonext+"_train.csv", index=False)
@@ -204,6 +262,7 @@ def main():
     test_df.to_csv(nonext+"_test.csv", index=False)
     print(f"Training DF Shape: {train_df.shape}")
     print(f"Test DF Shape: {test_df.shape}")
+"""
 
 if __name__ == "__main__":
     main()
